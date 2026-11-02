@@ -105,9 +105,33 @@ async function geocodeCity(city) {
   return {
     name: match.name,
     country: match.country,
+    countryCode: match.country_code,
     latitude: match.latitude,
     longitude: match.longitude,
   };
+}
+
+// Builds a clean "City, Country" label for display. Some locations
+// (e.g. Hong Kong) have no "country" field in the geocoding response,
+// only a country code, so this falls back to looking up the region
+// name from that code using the browser's built-in Intl API. If no
+// country name can be found at all, it just shows the city name.
+function getLocationLabel(location) {
+  let countryName = location.country;
+
+  if (!countryName && location.countryCode) {
+    try {
+      countryName = new Intl.DisplayNames(["en"], { type: "region" }).of(location.countryCode);
+    } catch (error) {
+      countryName = undefined;
+    }
+  }
+
+  if (!countryName || countryName === location.name) {
+    return location.name;
+  }
+
+  return `${location.name}, ${countryName}`;
 }
 
 // Fetches the daily forecast for a location and returns the weather
@@ -269,13 +293,13 @@ function showWeatherResult(location, forecast) {
   stateArea.innerHTML = `
     <div class="weather-result">
       <p class="weather-header">
-        <span class="weather-location">${location.name}, ${location.country}</span>
+        <span class="weather-location">${getLocationLabel(location)}</span>
         <span class="weather-date"> — ${displayDate}</span>
       </p>
-      <p class="weather-summary-text">${weather.icon} Expect ${weather.text} with a high of ${Math.round(forecast.tempMax)}°C.</p>
+      <p class="weather-summary-text">${weather.icon} Expect ${weather.text} with a high of ${formatTemperature(forecast.tempMax)}.</p>
       <div class="stats-row">
-        <div class="chip"><span class="chip-label">🌡️ High/Low:</span> ${Math.round(forecast.tempMax)}° / ${Math.round(forecast.tempMin)}°C</div>
-        <div class="chip"><span class="chip-label">🤔 Feels like:</span> ${Math.round(forecast.feelsLikeMax)}°C</div>
+        <div class="chip"><span class="chip-label">🌡️ High/Low:</span> ${formatTemperatureRange(forecast.tempMax, forecast.tempMin)}</div>
+        <div class="chip"><span class="chip-label">🤔 Feels like:</span> ${formatTemperature(forecast.feelsLikeMax)}</div>
         <div class="chip"><span class="chip-label">🌧️ Rain chance:</span> ${forecast.precipitationChance}%</div>
         <div class="chip"><span class="chip-label">💨 Wind:</span> ${Math.round(forecast.windSpeedMax)} km/h</div>
       </div>
@@ -298,6 +322,24 @@ function showWeatherResult(location, forecast) {
 // Turns a list of recommendation strings into <li> elements.
 function buildListItemsHtml(items) {
   return items.map((item) => `<li>${item}</li>`).join("");
+}
+
+// Converts a Celsius value to Fahrenheit.
+function celsiusToFahrenheit(celsius) {
+  return (celsius * 9) / 5 + 32;
+}
+
+// Formats a single temperature as "48°F (9°C)".
+function formatTemperature(celsius) {
+  const fahrenheit = Math.round(celsiusToFahrenheit(celsius));
+  return `${fahrenheit}°F (${Math.round(celsius)}°C)`;
+}
+
+// Formats a high/low temperature pair as "48°F / 45°F (9°C / 7°C)".
+function formatTemperatureRange(highCelsius, lowCelsius) {
+  const highFahrenheit = Math.round(celsiusToFahrenheit(highCelsius));
+  const lowFahrenheit = Math.round(celsiusToFahrenheit(lowCelsius));
+  return `${highFahrenheit}°F / ${lowFahrenheit}°F (${Math.round(highCelsius)}°C / ${Math.round(lowCelsius)}°C)`;
 }
 
 // Looks up the short plain-language text and icon for a weather code.
