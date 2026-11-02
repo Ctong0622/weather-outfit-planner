@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Outfit Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <header class="header">
+      <h1>Weather Outfit Planner</h1>
+      <p class="subtitle">Check the weather and find out what to wear and bring.</p>
+    </header>
+
+    <form id="outfit-form" class="form">
+      <div class="field">
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" placeholder="e.g., Toronto">
+      </div>
+      <div class="field">
+        <label for="date">Date</label>
+        <input type="date" id="date" name="date">
+      </div>
+      <button type="submit" class="button">Get Recommendation</button>
+    </form>
+
+    <section id="state-area" class="state-area">
+      <p class="empty-state">🌤️ Enter a city and date to get your outfit recommendation.</p>
+    </section>
+  </main>
+</body>
+</html>
