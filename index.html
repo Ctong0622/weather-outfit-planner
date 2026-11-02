@@ -9,11 +9,14 @@
 <body>
   <main class="card">
     <header class="header">
-      <h1>Weather Outfit Planner</h1>
+      <div class="header-title">
+        <span class="app-icon" aria-hidden="true">⛅</span>
+        <h1>Weather Outfit Planner</h1>
+      </div>
       <p class="subtitle">Check the weather and find out what to wear and bring.</p>
     </header>
 
-    <form id="outfit-form" class="form" novalidate>
+    <form id="outfit-form" class="form search-panel" novalidate>
       <div class="field">
         <label for="city">City</label>
         <input type="text" id="city" name="city" placeholder="e.g., Toronto">
@@ -26,7 +29,12 @@
     </form>
 
     <section id="state-area" class="state-area">
-      <p class="empty-state">🌤️ Enter a city and date to get your outfit recommendation.</p>
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">🌤️</div>
+        <p class="empty-title">No forecast yet</p>
+        <p class="empty-text">Plan what to wear before you head out.</p>
+        <p class="empty-hint">Enter a city and date to get your outfit recommendation.</p>
+      </div>
     </section>
   </main>
 

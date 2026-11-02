@@ -1,40 +1,79 @@
+/* ---- Design tokens ---- */
+:root {
+  --color-text: #1F2937;
+  --color-muted: #6B7280;
+  --color-border: #E5E7EB;
+  --color-primary: #2F80ED;
+  --color-primary-dark: #1C64D1;
+  --color-accent-wear: #1B9C85;
+  --color-accent-bring: #2F80ED;
+  --color-warning-text: #B45309;
+  --color-warning-bg: #FEF3C7;
+  --color-error-text: #B91C1C;
+  --color-error-bg: #FEE2E2;
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-card: 0 16px 40px rgba(31, 41, 55, 0.08), 0 2px 8px rgba(31, 41, 55, 0.04);
+}
+
 /* Base */
 body {
   margin: 0;
-  background-color: #F4F6F8;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #EAF4FD 0%, #F7FAFC 55%, #F9FAFB 100%);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color: #1F2937;
+  color: var(--color-text);
 }
 
 /* Card */
 .card {
-  max-width: 520px;
+  max-width: 660px;
   margin: 1.5rem auto;
   background-color: #FFFFFF;
-  border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  padding: 1.5rem;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.75rem;
 }
 
 /* Header */
 .header {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.app-icon {
+  font-size: 1.5rem;
+  line-height: 1;
 }
 
 .header h1 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
 }
 
 .subtitle {
   font-size: 0.95rem;
-  color: #6B7280;
-  margin: 0;
+  color: var(--color-muted);
+  margin: 0.4rem 0 0 0;
 }
 
-/* Form */
+/* Search panel: groups city, date, and the button into one unit */
+.search-panel {
+  background-color: #F8FAFC;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+
 .form {
   display: flex;
   flex-direction: column;
@@ -48,7 +87,7 @@ body {
 
 .field label {
   font-size: 0.85rem;
-  color: #6B7280;
+  color: var(--color-muted);
   margin-bottom: 0.35rem;
 }
 
@@ -56,36 +95,37 @@ body {
   height: 44px;
   font-size: 1rem;
   padding: 0.6rem 0.75rem;
-  border: 1px solid #E5E7EB;
-  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
   font-family: inherit;
+  background-color: #FFFFFF;
 }
 
 .field input:focus {
   outline: none;
-  border-color: #2F80ED;
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
 }
 
 .field input.invalid-field {
-  border-color: #B45309;
+  border-color: var(--color-warning-text);
 }
 
 /* Button */
 .button {
   width: 100%;
   height: 44px;
-  background-color: #2F80ED;
+  background-color: var(--color-primary);
   color: #FFFFFF;
   font-size: 1rem;
   font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
 .button:hover {
-  background-color: #1C64D1;
+  background-color: var(--color-primary-dark);
 }
 
 .button:active {
@@ -99,13 +139,35 @@ body {
 
 /* State area */
 .state-area {
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
 }
 
+/* Empty state */
 .empty-state {
   text-align: center;
-  color: #6B7280;
-  padding: 2rem 1rem;
+  padding: 2.5rem 1rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.empty-title {
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.35rem 0;
+}
+
+.empty-text {
+  color: var(--color-muted);
+  margin: 0 0 0.25rem 0;
+}
+
+.empty-hint {
+  font-size: 0.875rem;
+  color: var(--color-muted);
   margin: 0;
 }
 
@@ -115,15 +177,15 @@ body {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  padding: 2rem 1rem;
-  color: #6B7280;
+  padding: 2.5rem 1rem;
+  color: var(--color-muted);
 }
 
 .spinner {
   width: 28px;
   height: 28px;
-  border: 3px solid #E5E7EB;
-  border-top-color: #2F80ED;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -139,28 +201,30 @@ body {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   margin: 0;
 }
 
 .banner-error {
-  background-color: #FEE2E2;
-  color: #B91C1C;
-  border-left: 4px solid #B91C1C;
+  background-color: var(--color-error-bg);
+  color: var(--color-error-text);
+  border-left: 4px solid var(--color-error-text);
 }
 
 .banner-invalid {
-  background-color: #FEF3C7;
-  color: #B45309;
-  border-left: 4px solid #B45309;
+  background-color: var(--color-warning-bg);
+  color: var(--color-warning-text);
+  border-left: 4px solid var(--color-warning-text);
 }
 
 /* Weather result */
 .weather-result {
-  padding-top: 1rem;
-  border-top: 1px solid #E5E7EB;
+  background-color: #F5FAFF;
+  border: 1px solid #E3EEFC;
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
 }
 
 .weather-header {
@@ -169,38 +233,56 @@ body {
 
 .weather-location {
   font-weight: 700;
+  font-size: 1.2rem;
 }
 
 .weather-date {
-  color: #6B7280;
+  color: var(--color-muted);
 }
 
 .weather-summary-text {
-  margin: 0 0 0.75rem 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
 }
 
 .stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
 }
 
 .chip {
-  background-color: #F4F6F8;
-  border-radius: 6px;
-  padding: 0.4rem 0.6rem;
-  font-size: 0.875rem;
+  background-color: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .chip-label {
-  color: #6B7280;
+  display: block;
+  color: var(--color-muted);
+  font-weight: 500;
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
 }
 
 /* Recommendation sections (What to Wear / What to Bring) */
 .recommendation-section {
-  margin-top: 0.75rem;
-  padding-left: 0.75rem;
-  border-left: 3px solid #1B9C85;
+  margin-top: 1rem;
+  background-color: #FAFBFC;
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-accent-wear);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.1rem;
+}
+
+/* The second recommendation section rendered is always "What to Bring"
+   (script.js always outputs Wear, then Bring, in that order). */
+.recommendation-section + .recommendation-section {
+  border-top-color: var(--color-accent-bring);
 }
 
 .recommendation-header {
@@ -224,7 +306,7 @@ body {
 
 .recommendation-empty {
   margin: 0;
-  color: #6B7280;
+  color: var(--color-muted);
   font-size: 0.9rem;
 }
 
@@ -232,7 +314,7 @@ body {
 @media (min-width: 601px) {
   .card {
     margin: 3rem auto;
-    padding: 2rem;
+    padding: 2.25rem;
   }
 
   .form {
@@ -252,5 +334,9 @@ body {
   .button {
     width: auto;
     padding: 0 1.5rem;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
