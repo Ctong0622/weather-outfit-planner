@@ -59,4 +59,4 @@ One important part of the process was building the project step by step. The fir
 I also tested different cities, weather conditions, invalid inputs, and screen sizes to make sure the website worked correctly.
 
 ## Live Site
-
+https://ctong0622.github.io/weather-outfit-planner/
