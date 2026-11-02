@@ -1,11 +1,39 @@
 // Weather Outfit Planner - script.js
 // This file currently handles: form submission, input validation,
-// and converting a city name into coordinates using the Open-Meteo
-// Geocoding API. The forecast lookup and outfit recommendations will
-// be added in a later step.
+// converting a city name into coordinates (Open-Meteo Geocoding API),
+// and fetching the daily forecast for the selected date (Open-Meteo
+// Forecast API). Clothing and "what to bring" recommendations will be
+// added in a later step.
 
 const GEOCODING_API_URL = "https://geocoding-api.open-meteo.com/v1/search";
+const FORECAST_API_URL = "https://api.open-meteo.com/v1/forecast";
 const MAX_FORECAST_DAYS_AHEAD = 16; // Open-Meteo's supported forecast range
+
+// Short plain-language descriptions for Open-Meteo's weather codes.
+// https://open-meteo.com/en/docs (WMO weather codes)
+const WEATHER_CODE_DESCRIPTIONS = {
+  0: { text: "clear skies", icon: "☀️" },
+  1: { text: "mostly clear skies", icon: "🌤️" },
+  2: { text: "partly cloudy skies", icon: "⛅" },
+  3: { text: "cloudy skies", icon: "☁️" },
+  45: { text: "fog", icon: "🌫️" },
+  48: { text: "freezing fog", icon: "🌫️" },
+  51: { text: "light drizzle", icon: "🌦️" },
+  53: { text: "drizzle", icon: "🌦️" },
+  55: { text: "heavy drizzle", icon: "🌧️" },
+  61: { text: "light rain", icon: "🌦️" },
+  63: { text: "rain", icon: "🌧️" },
+  65: { text: "heavy rain", icon: "🌧️" },
+  71: { text: "light snow", icon: "🌨️" },
+  73: { text: "snow", icon: "🌨️" },
+  75: { text: "heavy snow", icon: "❄️" },
+  80: { text: "rain showers", icon: "🌦️" },
+  81: { text: "rain showers", icon: "🌧️" },
+  82: { text: "heavy rain showers", icon: "🌧️" },
+  95: { text: "thunderstorms", icon: "⛈️" },
+  96: { text: "thunderstorms with hail", icon: "⛈️" },
+  99: { text: "thunderstorms with heavy hail", icon: "⛈️" },
+};
 
 // Elements
 const form = document.getElementById("outfit-form");
@@ -82,6 +110,52 @@ async function geocodeCity(city) {
   };
 }
 
+// Fetches the daily forecast for a location and returns the weather
+// values for the exact selected date, or null if that date isn't in
+// the response. Throws an error if the request fails.
+async function getForecastForDate(latitude, longitude, dateValue) {
+  const dailyFields = [
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "apparent_temperature_max",
+    "apparent_temperature_min",
+    "precipitation_sum",
+    "precipitation_probability_max",
+    "weathercode",
+    "windspeed_10m_max",
+  ].join(",");
+
+  const url =
+    `${FORECAST_API_URL}?latitude=${latitude}&longitude=${longitude}` +
+    `&daily=${dailyFields}&timezone=auto` +
+    `&start_date=${dateValue}&end_date=${dateValue}`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Forecast request failed.");
+  }
+
+  const data = await response.json();
+  const dayIndex = data.daily?.time?.indexOf(dateValue);
+
+  if (dayIndex === undefined || dayIndex === -1) {
+    return null;
+  }
+
+  return {
+    date: data.daily.time[dayIndex],
+    tempMax: data.daily.temperature_2m_max[dayIndex],
+    tempMin: data.daily.temperature_2m_min[dayIndex],
+    feelsLikeMax: data.daily.apparent_temperature_max[dayIndex],
+    feelsLikeMin: data.daily.apparent_temperature_min[dayIndex],
+    precipitationSum: data.daily.precipitation_sum[dayIndex],
+    precipitationChance: data.daily.precipitation_probability_max[dayIndex],
+    weatherCode: data.daily.weathercode[dayIndex],
+    windSpeedMax: data.daily.windspeed_10m_max[dayIndex],
+  };
+}
+
 // ---- Page updates ----
 
 function showInvalid(message, invalidFields) {
@@ -105,9 +179,43 @@ function showError(message) {
   stateArea.innerHTML = `<p class="banner banner-error">⚠️ ${message}</p>`;
 }
 
-// Temporary confirmation while the forecast lookup is not built yet.
-function showLocationFound(location) {
-  stateArea.innerHTML = `<p class="empty-state">📍 Found ${location.name}, ${location.country}. Weather lookup coming soon.</p>`;
+// Renders the Weather Result section for the matched location and
+// the forecast values for the selected date.
+function showWeatherResult(location, forecast) {
+  const weather = getWeatherDescription(forecast.weatherCode);
+  const displayDate = formatDisplayDate(forecast.date);
+
+  stateArea.innerHTML = `
+    <div class="weather-result">
+      <p class="weather-header">
+        <span class="weather-location">${location.name}, ${location.country}</span>
+        <span class="weather-date"> — ${displayDate}</span>
+      </p>
+      <p class="weather-summary-text">${weather.icon} Expect ${weather.text} with a high of ${Math.round(forecast.tempMax)}°C.</p>
+      <div class="stats-row">
+        <div class="chip"><span class="chip-label">🌡️ High/Low:</span> ${Math.round(forecast.tempMax)}° / ${Math.round(forecast.tempMin)}°C</div>
+        <div class="chip"><span class="chip-label">🤔 Feels like:</span> ${Math.round(forecast.feelsLikeMax)}°C</div>
+        <div class="chip"><span class="chip-label">🌧️ Rain chance:</span> ${forecast.precipitationChance}%</div>
+        <div class="chip"><span class="chip-label">💨 Wind:</span> ${Math.round(forecast.windSpeedMax)} km/h</div>
+      </div>
+    </div>
+  `;
+}
+
+// Looks up the short plain-language text and icon for a weather code.
+// Falls back to a generic description for any unlisted code.
+function getWeatherDescription(code) {
+  return WEATHER_CODE_DESCRIPTIONS[code] || { text: "mixed conditions", icon: "🌡️" };
+}
+
+// Formats a "YYYY-MM-DD" string as a short, friendly date (e.g. "Sat, Nov 7").
+function formatDisplayDate(dateValue) {
+  const date = new Date(`${dateValue}T00:00:00`);
+  return date.toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 function clearInvalidFields() {
@@ -153,7 +261,14 @@ async function handleSubmit(event) {
       return;
     }
 
-    showLocationFound(location);
+    const forecast = await getForecastForDate(location.latitude, location.longitude, dateValue);
+
+    if (!forecast) {
+      showError("We couldn't get weather data for that date. Please try a different date.");
+      return;
+    }
+
+    showWeatherResult(location, forecast);
   } catch (error) {
     showError("Something went wrong while checking the weather. Please try again.");
   } finally {

@@ -157,6 +157,45 @@ body {
   border-left: 4px solid #B45309;
 }
 
+/* Weather result */
+.weather-result {
+  padding-top: 1rem;
+  border-top: 1px solid #E5E7EB;
+}
+
+.weather-header {
+  margin: 0 0 0.5rem 0;
+}
+
+.weather-location {
+  font-weight: 700;
+}
+
+.weather-date {
+  color: #6B7280;
+}
+
+.weather-summary-text {
+  margin: 0 0 0.75rem 0;
+}
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  background-color: #F4F6F8;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.875rem;
+}
+
+.chip-label {
+  color: #6B7280;
+}
+
 /* Responsive layout */
 @media (min-width: 601px) {
   .card {
