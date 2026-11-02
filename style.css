@@ -196,6 +196,38 @@ body {
   color: #6B7280;
 }
 
+/* Recommendation sections (What to Wear / What to Bring) */
+.recommendation-section {
+  margin-top: 0.75rem;
+  padding-left: 0.75rem;
+  border-left: 3px solid #1B9C85;
+}
+
+.recommendation-header {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.recommendation-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.recommendation-list li {
+  margin-bottom: 0.5rem;
+}
+
+.recommendation-list li:last-child {
+  margin-bottom: 0;
+}
+
+.recommendation-empty {
+  margin: 0;
+  color: #6B7280;
+  font-size: 0.9rem;
+}
+
 /* Responsive layout */
 @media (min-width: 601px) {
   .card {

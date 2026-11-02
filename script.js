@@ -156,6 +156,84 @@ async function getForecastForDate(latitude, longitude, dateValue) {
   };
 }
 
+// ---- Recommendation logic ----
+
+// Weather code groups used by the recommendation rules below.
+// https://open-meteo.com/en/docs (WMO weather codes)
+const SNOW_CODES = [71, 73, 75, 77, 85, 86];
+const RAIN_CODES = [51, 53, 55, 61, 63, 65, 80, 81, 82];
+const THUNDERSTORM_CODES = [95, 96, 99];
+const CLEAR_CODES = [0, 1];
+
+const STRONG_WIND_KMH = 30;
+const HIGH_RAIN_CHANCE_PERCENT = 40;
+
+// Builds the "What to Wear" list based on temperature and weather
+// conditions. Returns a short list of plain-language clothing items.
+function getClothingRecommendations(forecast) {
+  const recommendations = [];
+  const feelsLike = (forecast.feelsLikeMax + forecast.feelsLikeMin) / 2;
+
+  if (feelsLike < 0) {
+    recommendations.push("🧥 Heavy winter coat and warm layers");
+  } else if (feelsLike < 10) {
+    recommendations.push("🧥 Coat or warm jacket");
+  } else if (feelsLike < 15) {
+    recommendations.push("🧥 Light jacket or sweater");
+  } else if (feelsLike < 20) {
+    recommendations.push("👕 Light layers");
+  } else if (feelsLike < 27) {
+    recommendations.push("👕 T-shirt or other light clothing");
+  } else {
+    recommendations.push("👕 Very light, breathable clothing");
+  }
+
+  if (SNOW_CODES.includes(forecast.weatherCode)) {
+    recommendations.push("🧤 Warm, waterproof clothing");
+  } else if (RAIN_CODES.includes(forecast.weatherCode) || forecast.precipitationSum > 0) {
+    recommendations.push("🌧️ Rain jacket");
+  }
+
+  if (forecast.windSpeedMax >= STRONG_WIND_KMH) {
+    recommendations.push("🧣 Wind-resistant outer layer");
+  }
+
+  return removeDuplicates(recommendations);
+}
+
+// Builds the "What to Bring" list based on precipitation, wind, and
+// weather conditions. Returns a short list of plain-language items.
+function getItemsToBring(forecast) {
+  const recommendations = [];
+
+  if (SNOW_CODES.includes(forecast.weatherCode)) {
+    recommendations.push("🥾 Waterproof boots");
+  }
+
+  if (
+    RAIN_CODES.includes(forecast.weatherCode) ||
+    forecast.precipitationChance >= HIGH_RAIN_CHANCE_PERCENT ||
+    forecast.precipitationSum > 0
+  ) {
+    recommendations.push("☂️ Umbrella");
+  }
+
+  if (CLEAR_CODES.includes(forecast.weatherCode) && forecast.tempMax >= 20) {
+    recommendations.push("🕶️ Sunglasses and sunscreen");
+  }
+
+  if (THUNDERSTORM_CODES.includes(forecast.weatherCode)) {
+    recommendations.push("⚠️ Stay indoors if possible");
+  }
+
+  return removeDuplicates(recommendations);
+}
+
+// Removes duplicate entries while keeping the original order.
+function removeDuplicates(list) {
+  return Array.from(new Set(list));
+}
+
 // ---- Page updates ----
 
 function showInvalid(message, invalidFields) {
@@ -179,11 +257,14 @@ function showError(message) {
   stateArea.innerHTML = `<p class="banner banner-error">⚠️ ${message}</p>`;
 }
 
-// Renders the Weather Result section for the matched location and
-// the forecast values for the selected date.
+// Renders the Weather Result section, plus the "What to Wear" and
+// "What to Bring" recommendation sections, for the matched location
+// and the forecast values for the selected date.
 function showWeatherResult(location, forecast) {
   const weather = getWeatherDescription(forecast.weatherCode);
   const displayDate = formatDisplayDate(forecast.date);
+  const clothingItems = getClothingRecommendations(forecast);
+  const itemsToBring = getItemsToBring(forecast);
 
   stateArea.innerHTML = `
     <div class="weather-result">
@@ -199,7 +280,24 @@ function showWeatherResult(location, forecast) {
         <div class="chip"><span class="chip-label">💨 Wind:</span> ${Math.round(forecast.windSpeedMax)} km/h</div>
       </div>
     </div>
+    <div class="recommendation-section">
+      <h3 class="recommendation-header">👕 What to Wear</h3>
+      <ul class="recommendation-list">${buildListItemsHtml(clothingItems)}</ul>
+    </div>
+    <div class="recommendation-section">
+      <h3 class="recommendation-header">🎒 What to Bring</h3>
+      ${
+        itemsToBring.length > 0
+          ? `<ul class="recommendation-list">${buildListItemsHtml(itemsToBring)}</ul>`
+          : `<p class="recommendation-empty">No extra items needed today.</p>`
+      }
+    </div>
   `;
+}
+
+// Turns a list of recommendation strings into <li> elements.
+function buildListItemsHtml(items) {
+  return items.map((item) => `<li>${item}</li>`).join("");
 }
 
 // Looks up the short plain-language text and icon for a weather code.
