@@ -67,6 +67,10 @@ body {
   box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
 }
 
+.field input.invalid-field {
+  border-color: #B45309;
+}
+
 /* Button */
 .button {
   width: 100%;
@@ -88,6 +92,11 @@ body {
   transform: scale(0.98);
 }
 
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* State area */
 .state-area {
   margin-top: 1.25rem;
@@ -98,6 +107,54 @@ body {
   color: #6B7280;
   padding: 2rem 1rem;
   margin: 0;
+}
+
+/* Loading state */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  color: #6B7280;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #E5E7EB;
+  border-top-color: #2F80ED;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Banner (used for error and invalid input states) */
+.banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.banner-error {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+  border-left: 4px solid #B91C1C;
+}
+
+.banner-invalid {
+  background-color: #FEF3C7;
+  color: #B45309;
+  border-left: 4px solid #B45309;
 }
 
 /* Responsive layout */
